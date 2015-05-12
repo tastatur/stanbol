@@ -3,3 +3,9 @@
 .settings
 target
 *~
+downloads
+enhancement-engines/topic/engine/src/main/resources/data-files/
+dependency-reduced-pom.xml
+*.iml
+*.ipr
+*.iws

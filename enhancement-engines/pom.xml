@@ -114,6 +114,9 @@
     <module>geonames</module> <!-- http://geonames.org -->
     <module>opencalais</module> <!-- http://opencalais.com/ -->
     <module>zemanta</module> <!-- htt://zemanta.com -->
+
+    <!-- Misc Engines for master thesis -->
+    <module>stanford-ner</module>
   </modules>
 
   <build>

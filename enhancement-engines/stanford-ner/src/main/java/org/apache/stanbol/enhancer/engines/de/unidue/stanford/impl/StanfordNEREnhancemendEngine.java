@@ -3,12 +3,10 @@ package org.apache.stanbol.enhancer.engines.de.unidue.stanford.impl;
 import edu.stanford.nlp.ie.AbstractSequenceClassifier;
 import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.ling.CoreLabel;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.Properties;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Service;
+import org.apache.felix.scr.annotations.*;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
-import org.apache.stanbol.enhancer.nlp.model.AnalysedTextUtils;
+import org.apache.stanbol.enhancer.nlp.model.AnalysedTextFactory;
+import org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
@@ -33,6 +31,9 @@ public class StanfordNEREnhancemendEngine extends AbstractEnhancementEngine<Runt
     private final Logger log = LoggerFactory.getLogger(getClass());
     public static final AbstractSequenceClassifier<CoreLabel> CLASSIFIER;
 
+    @Reference
+    private AnalysedTextFactory analysedTextFactory;
+
     //Ja, ich weiß, das ist schmutzig, aber die Lösung ist halt die schnellste :)
     static {
         String classifierPath = StanfordNEREnhancemendEngine.class.getClassLoader().getResource("classifiers/edu/stanford/nlp/models/ner/german.dewac_175m_600.crf.ser.gz").getPath();
@@ -56,7 +57,7 @@ public class StanfordNEREnhancemendEngine extends AbstractEnhancementEngine<Runt
 
     @Override
     public void computeEnhancements(ContentItem ci) throws EngineException {
-        AnalysedText analysedText = AnalysedTextUtils.getAnalysedText(ci);
+        AnalysedText analysedText = NlpEngineHelper.initAnalysedText(this, analysedTextFactory, ci);
         List<List<CoreLabel>> extractedEntities = CLASSIFIER.classify(analysedText.getText().toString());
         log.debug("Stanford NER is done, hopefully without killing JVM with OOM exception");
     }

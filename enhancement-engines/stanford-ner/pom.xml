@@ -39,7 +39,7 @@
                             *
                         </Import-Package>
                         <Export-Package>
-                            org.apache.stanbol.enhancer.engines.de.unidue.stanford.impl.*; version="0.12"
+                            de.unidue.stanford.*; version="0.12"
                         </Export-Package>
                         <Embed-Dependency>
                             stanford-ner,stanford-resources,jollyday,joda-time,joda-convert

@@ -1,12 +1,13 @@
-package org.apache.stanbol.enhancer.engines.de.unidue.stanford.impl;
+package de.unidue.stanford.impl;
 
+import de.unidue.stanford.TextAnnotationService;
 import edu.stanford.nlp.ie.AbstractSequenceClassifier;
 import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.ling.CoreLabel;
 import org.apache.felix.scr.annotations.*;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
-import org.apache.stanbol.enhancer.nlp.model.AnalysedTextUtils;
-import org.apache.stanbol.enhancer.nlp.model.Section;
+import org.apache.stanbol.enhancer.nlp.model.AnalysedTextFactory;
+import org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
@@ -19,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 @Component(immediate = true, metatype = true)
@@ -33,6 +33,14 @@ public class StanfordNEREnhancemendEngine extends AbstractEnhancementEngine<Runt
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     private AbstractSequenceClassifier<CoreLabel> classifier;
+
+    @SuppressWarnings("all")
+    @Reference
+    private AnalysedTextFactory analysedTextFactory;
+
+    @SuppressWarnings("all")
+    @Reference
+    private TextAnnotationService textAnnotationService;
 
     @Activate
     @Override
@@ -69,56 +77,8 @@ public class StanfordNEREnhancemendEngine extends AbstractEnhancementEngine<Runt
 
     @Override
     public void computeEnhancements(ContentItem ci) throws EngineException {
-        AnalysedText analysedText = AnalysedTextUtils.getAnalysedText(ci);
-        if (cantWorkWithText(analysedText)) {
-            log.warn("Can't enhance text");
-            return;
-        }
-
-        List<CoreLabel> extractedEntities = extractEntities(analysedText);
-        log.info("Stanford NER is done, hopefully without killing JVM with OOM exception.");
-        log.info("Now is time for RDF creation!");
-
-        createTextAnnotations(ci, extractedEntities);
-    }
-
-    private boolean cantWorkWithText(AnalysedText analysedText) {
-        return (analysedText == null || !analysedText.getTokens().hasNext());
-    }
-
-    private List<CoreLabel> extractEntities(AnalysedText analysedText) {
-        List<CoreLabel> coreLabels = new ArrayList<>();
-        List<Section> sentences = new ArrayList<>();
-        AnalysedTextUtils.appandToList(analysedText.getSentences(), sentences);
-        if (sentences.isEmpty()) {
-            sentences.add(analysedText);
-        }
-
-        for (Section sentence : sentences) {
-            coreLabels.addAll(extractEntitiesFromSentence(sentence));
-        }
-        return coreLabels;
-    }
-
-    private List<CoreLabel> extractEntitiesFromSentence(Section sentence) {
-        List<CoreLabel> coreLabels = new ArrayList<>();
-        sentence.getTokens().forEachRemaining(token -> {
-            CoreLabel label = new CoreLabel();
-            label.setWord(token.getSpan());
-            label.setValue(token.getSpan());
-            label.setOriginalText(sentence.getSpan());
-            coreLabels.add(label);
-        });
-
-        return classifier.classifySentence(coreLabels);
-    }
-
-    private void createTextAnnotations(ContentItem ci, List<CoreLabel> extractedEntities) {
-        ci.getLock().writeLock().lock();
-        try {
-            log.info("Test");
-        } finally {
-            ci.getLock().writeLock().unlock();
-        }
+        AnalysedText analysedText = NlpEngineHelper.initAnalysedText(this, analysedTextFactory, ci);
+        List<List<CoreLabel>> extractedEntities = classifier.classify(analysedText.getText().toString());
+        textAnnotationService.populateTextAnnotations(extractedEntities, ci);
     }
 }

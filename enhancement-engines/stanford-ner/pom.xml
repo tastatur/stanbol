@@ -42,7 +42,7 @@
                             org.apache.stanbol.enhancer.engines.de.unidue.stanford.impl.*; version="0.12"
                         </Export-Package>
                         <Embed-Dependency>
-                            stanford-ner,stanford-resources,jollyday
+                            stanford-ner,stanford-resources,jollyday,joda-time,joda-convert
                         </Embed-Dependency>
                         <Embed-Transitive>true</Embed-Transitive>
                     </instructions>
@@ -86,6 +86,11 @@
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
             <version>2.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.joda</groupId>
+            <artifactId>joda-convert</artifactId>
+            <version>1.7</version>
         </dependency>
         <dependency>
             <groupId>de.jollyday</groupId>

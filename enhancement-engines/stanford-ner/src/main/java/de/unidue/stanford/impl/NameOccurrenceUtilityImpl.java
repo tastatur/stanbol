@@ -76,7 +76,7 @@ public class NameOccurrenceUtilityImpl implements NameOccurrenceUtility {
         @Override
         public boolean test(CoreLabel coreLabel) {
             final String answer = StringUtils.getNotNullString(coreLabel.get(CoreAnnotations.AnswerAnnotation.class));
-            return answer.equals(SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL);
+            return !answer.equals(SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL);
         }
     }
 }

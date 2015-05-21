@@ -13,6 +13,8 @@ import org.osgi.framework.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Component(immediate = true)
 @Service(value = NameOccurrenceUtility.class)
@@ -21,11 +23,12 @@ import java.util.List;
 })
 public class NameOccurrenceUtilityImpl implements NameOccurrenceUtility {
     @Override
-    public List<List<CoreLabel>> mergeTokens(List<List<CoreLabel>> labeledTokens) {
-        List<List<CoreLabel>> mergedTokens = new ArrayList<>();
+    public List<CoreLabel> mergeTokens(List<List<CoreLabel>> labeledTokens) {
+        List<CoreLabel> mergedTokens = new ArrayList<>();
         labeledTokens.stream().forEachOrdered(tokensInSentence -> {
+            setSentenceText(tokensInSentence);
             List<CoreLabel> newTokens = mergedTokensInSentence(tokensInSentence);
-            mergedTokens.add(newTokens);
+            mergedTokens.addAll(newTokens);
         });
         return mergedTokens;
     }
@@ -52,10 +55,28 @@ public class NameOccurrenceUtilityImpl implements NameOccurrenceUtility {
                 mergedTokens.add(currentToken);
             }
         }
-        return mergedTokens;
+        return mergedTokens.stream().filter(new IsNerToken()).collect(Collectors.toList());
     }
 
     private boolean shouldMerge(String currentTag, String previousTag) {
         return currentTag.equals(previousTag) && !currentTag.equals(SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL);
+    }
+
+    public void setSentenceText(List<CoreLabel> sentenceText) {
+        StringBuilder sentenceBuilder = new StringBuilder();
+        sentenceText.stream().forEachOrdered(token -> {
+            String tokenText = StringUtils.getNotNullString(token.get(CoreAnnotations.OriginalTextAnnotation.class));
+            String before = StringUtils.getNotNullString(token.get(CoreAnnotations.BeforeAnnotation.class));
+            sentenceBuilder.append(before).append(tokenText);
+        });
+        sentenceText.parallelStream().forEach(token -> token.set(CoreAnnotations.CharAnnotation.class, sentenceBuilder.toString()));
+    }
+
+    private class IsNerToken implements Predicate<CoreLabel> {
+        @Override
+        public boolean test(CoreLabel coreLabel) {
+            final String answer = StringUtils.getNotNullString(coreLabel.get(CoreAnnotations.AnswerAnnotation.class));
+            return answer.equals(SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL);
+        }
     }
 }

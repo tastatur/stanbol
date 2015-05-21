@@ -11,5 +11,5 @@ public interface NameOccurrenceUtility {
      * @param labeledTokens Tokens, labeled by classificator
      * @return merged tokens
      */
-    List<List<CoreLabel>> mergeTokens(List<List<CoreLabel>> labeledTokens);
+    List<CoreLabel> mergeTokens(List<List<CoreLabel>> labeledTokens);
 }

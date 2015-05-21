@@ -84,7 +84,7 @@ public class StanfordNEREnhancemendEngine extends AbstractEnhancementEngine<Runt
     public void computeEnhancements(ContentItem ci) throws EngineException {
         AnalysedText analysedText = NlpEngineHelper.initAnalysedText(this, analysedTextFactory, ci);
         List<List<CoreLabel>> labeledTokens = classifier.classify(analysedText.getText().toString());
-        List<List<CoreLabel>> extractedEntities = nameOccurrenceUtility.mergeTokens(labeledTokens);
-        textAnnotationService.populateTextAnnotations(extractedEntities, ci);
+        List<CoreLabel> extractedEntities = nameOccurrenceUtility.mergeTokens(labeledTokens);
+        textAnnotationService.populateTextAnnotations(extractedEntities, ci, this);
     }
 }

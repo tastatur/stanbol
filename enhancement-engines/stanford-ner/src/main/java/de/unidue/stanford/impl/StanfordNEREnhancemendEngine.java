@@ -1,6 +1,6 @@
 package de.unidue.stanford.impl;
 
-import de.unidue.stanford.NameOccurenceUtility;
+import de.unidue.stanford.NameOccurrenceUtility;
 import de.unidue.stanford.TextAnnotationService;
 import edu.stanford.nlp.ie.AbstractSequenceClassifier;
 import edu.stanford.nlp.ie.crf.CRFClassifier;
@@ -45,7 +45,7 @@ public class StanfordNEREnhancemendEngine extends AbstractEnhancementEngine<Runt
 
     @SuppressWarnings("all")
     @Reference
-    private NameOccurenceUtility nameOccurenceUtility;
+    private NameOccurrenceUtility nameOccurrenceUtility;
 
     @Activate
     @Override
@@ -84,7 +84,7 @@ public class StanfordNEREnhancemendEngine extends AbstractEnhancementEngine<Runt
     public void computeEnhancements(ContentItem ci) throws EngineException {
         AnalysedText analysedText = NlpEngineHelper.initAnalysedText(this, analysedTextFactory, ci);
         List<List<CoreLabel>> labeledTokens = classifier.classify(analysedText.getText().toString());
-        List<List<CoreLabel>> extractedEntities = nameOccurenceUtility.mergeTokens(labeledTokens);
+        List<List<CoreLabel>> extractedEntities = nameOccurrenceUtility.mergeTokens(labeledTokens);
         textAnnotationService.populateTextAnnotations(extractedEntities, ci);
     }
 }

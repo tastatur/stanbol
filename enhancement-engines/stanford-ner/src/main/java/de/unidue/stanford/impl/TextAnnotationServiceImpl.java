@@ -19,5 +19,11 @@ import java.util.List;
 public class TextAnnotationServiceImpl implements TextAnnotationService {
     @Override
     public void populateTextAnnotations(List<List<CoreLabel>> extractedEntities, ContentItem ci) {
+        ci.getLock().writeLock().lock();
+        try {
+
+        } finally {
+            ci.getLock().writeLock().unlock();
+        }
     }
 }

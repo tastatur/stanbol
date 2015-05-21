@@ -4,7 +4,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 
 import java.util.List;
 
-public interface NameOccurenceUtility {
+public interface NameOccurrenceUtility {
     /**
      * Diese Methode fasst die Tokens, die zur gleichen Entität gehören, zusammen.
      * Siehe PlainTextDocumentReaderAndWriter.printAnswersInlineXML für weitere Details

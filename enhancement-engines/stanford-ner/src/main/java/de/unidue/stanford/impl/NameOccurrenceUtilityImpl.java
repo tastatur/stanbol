@@ -69,7 +69,8 @@ public class NameOccurrenceUtilityImpl implements NameOccurrenceUtility {
             String before = StringUtils.getNotNullString(token.get(CoreAnnotations.BeforeAnnotation.class));
             sentenceBuilder.append(before).append(tokenText);
         });
-        sentenceText.parallelStream().forEach(token -> token.set(CoreAnnotations.CharAnnotation.class, sentenceBuilder.toString()));
+        String text = sentenceBuilder.toString();
+        sentenceText.parallelStream().forEach(token -> token.set(CoreAnnotations.CharAnnotation.class, text));
     }
 
     private class IsNerToken implements Predicate<CoreLabel> {

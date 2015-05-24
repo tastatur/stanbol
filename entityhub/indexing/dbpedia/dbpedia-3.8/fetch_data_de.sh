@@ -46,6 +46,7 @@ files=(dbpedia_3.8.owl \
     de/instance_types_de.nt \
     en/images_en.nt \
     de/images_de.nt \
+    en/persondata_en.nt \
     de/persondata_de.nt \
     en/geo_coordinates_en.nt \
     de/geo_coordinates_de.nt \

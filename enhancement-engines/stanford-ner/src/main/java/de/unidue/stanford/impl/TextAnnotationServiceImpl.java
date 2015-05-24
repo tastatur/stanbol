@@ -37,7 +37,7 @@ public class TextAnnotationServiceImpl implements TextAnnotationService {
         ci.getLock().writeLock().lock();
         try {
             extractedEntities.forEach(ner -> {
-                String name = ner.get(CoreAnnotations.OriginalTextAnnotation.class);
+                String name = ner.get(CoreAnnotations.TextAnnotation.class);
                 String context = ner.get(CoreAnnotations.CharAnnotation.class);
                 Integer start = ner.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
                 Integer end = ner.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);

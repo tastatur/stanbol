@@ -40,16 +40,14 @@ public class NameOccurrenceUtilityImpl implements NameOccurrenceUtility {
             CoreLabel lastToken = mergedTokens.get(mergedTokens.size()-1);
             CoreLabel currentToken = tokensInSentence.get(i);
 
-            String previousTag = StringUtils.getNotNullString(lastToken.get(CoreAnnotations.AnswerAnnotation.class));
-            String currentTag = StringUtils.getNotNullString(currentToken.get(CoreAnnotations.AnswerAnnotation.class));
-            String previousText = StringUtils.getNotNullString(lastToken.get(CoreAnnotations.OriginalTextAnnotation.class));
-            String currentText = StringUtils.getNotNullString(currentToken.get(CoreAnnotations.OriginalTextAnnotation.class));
+            String previousText = StringUtils.getNotNullString(lastToken.get(CoreAnnotations.TextAnnotation.class));
+            String currentText = StringUtils.getNotNullString(currentToken.get(CoreAnnotations.TextAnnotation.class));
             String before = StringUtils.getNotNullString(currentToken.get(CoreAnnotations.BeforeAnnotation.class));
             Integer newEnd = currentToken.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
 
-            if (shouldMerge(currentTag, previousTag)) {
+            if (shouldMerge(lastToken, currentToken)) {
                 String newText = previousText.concat(before).concat(currentText);
-                lastToken.set(CoreAnnotations.OriginalTextAnnotation.class, newText);
+                lastToken.set(CoreAnnotations.TextAnnotation.class, newText);
                 lastToken.set(CoreAnnotations.CharacterOffsetEndAnnotation.class, newEnd);
             } else {
                 mergedTokens.add(currentToken);
@@ -58,14 +56,19 @@ public class NameOccurrenceUtilityImpl implements NameOccurrenceUtility {
         return mergedTokens.stream().filter(new IsNerToken()).collect(Collectors.toList());
     }
 
-    private boolean shouldMerge(String currentTag, String previousTag) {
-        return currentTag.equals(previousTag) && !currentTag.equals(SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL);
+    private boolean shouldMerge(CoreLabel lastToken, CoreLabel currentToken) {
+        String previousTag = StringUtils.getNotNullString(lastToken.get(CoreAnnotations.AnswerAnnotation.class));
+        String currentTag = StringUtils.getNotNullString(currentToken.get(CoreAnnotations.AnswerAnnotation.class));
+        String distSimLast = StringUtils.getNotNullString(lastToken.get(CoreAnnotations.DistSimAnnotation.class));
+        String distSimCurrent = StringUtils.getNotNullString(currentToken.get(CoreAnnotations.DistSimAnnotation.class));
+        return currentTag.equals(previousTag) && !currentTag.equals(SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL) &&
+                !distSimLast.equals("null") && !distSimCurrent.equals("null");
     }
 
     public void setSentenceText(List<CoreLabel> sentenceText) {
         StringBuilder sentenceBuilder = new StringBuilder();
         sentenceText.stream().forEachOrdered(token -> {
-            String tokenText = StringUtils.getNotNullString(token.get(CoreAnnotations.OriginalTextAnnotation.class));
+            String tokenText = StringUtils.getNotNullString(token.get(CoreAnnotations.TextAnnotation.class));
             String before = StringUtils.getNotNullString(token.get(CoreAnnotations.BeforeAnnotation.class));
             sentenceBuilder.append(before).append(tokenText);
         });
@@ -77,7 +80,8 @@ public class NameOccurrenceUtilityImpl implements NameOccurrenceUtility {
         @Override
         public boolean test(CoreLabel coreLabel) {
             final String answer = StringUtils.getNotNullString(coreLabel.get(CoreAnnotations.AnswerAnnotation.class));
-            return !answer.equals(SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL);
+            final String distSim = StringUtils.getNotNullString(coreLabel.get(CoreAnnotations.DistSimAnnotation.class));
+            return !answer.equals(SeqClassifierFlags.DEFAULT_BACKGROUND_SYMBOL) && !distSim.equals("null");
         }
     }
 }

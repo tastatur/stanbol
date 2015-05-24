@@ -16,7 +16,7 @@
 # limitations under the License.
 
 
-INDEXING_JAR=`pwd`/target/org.apache.stanbol.entityhub.indexing.dbpedia-*-jar-with-dependencies.jar
+INDEXING_JAR=`pwd`/target/org.apache.stanbol.entityhub.indexing.dbpedia-0.12.1-SNAPSHOT.jar
 WORKSPACE=/tmp/dbpedia-index
 DBPEDIA=http://downloads.dbpedia.org/3.7
 MAX_SORT_MEM=2G
@@ -35,7 +35,7 @@ java -jar $INDEXING_JAR init
 # wikipedia graph: computing this takes around 2 hours
 if [ ! -f $WORKSPACE/indexing/resources/incoming_links.txt ]
 then
-    curl $DBPEDIA/en/page_links_en.nt.bz2 \
+    curl $DBPEDIA/de/page_links_de.nt.bz2 \
         | bzcat \
         | sed -e 's/.*<http\:\/\/dbpedia\.org\/resource\/\([^>]*\)> ./\1/' \
         | sort -S $MAX_SORT_MEM \
@@ -48,30 +48,13 @@ cd $WORKSPACE/indexing/resources/rdfdata
 
 # General attributes for all entities
 wget -c $DBPEDIA/dbpedia_3.7.owl.bz2
-wget -c $DBPEDIA/en/instance_types_en.nt.bz2
-wget -c $DBPEDIA/ar/labels_ar.nt.bz2
-wget -c $DBPEDIA/en/labels_en.nt.bz2
-wget -c $DBPEDIA/es/labels_es.nt.bz2
-wget -c $DBPEDIA/fr/labels_fr.nt.bz2
-wget -c $DBPEDIA/he/labels_he.nt.bz2
-wget -c $DBPEDIA/it/labels_it.nt.bz2
-wget -c $DBPEDIA/ja/labels_ja.nt.bz2
-wget -c $DBPEDIA/ru/labels_ru.nt.bz2
-wget -c $DBPEDIA/tr/labels_tr.nt.bz2
-wget -c $DBPEDIA/zh/labels_zh.nt.bz2
-wget -c $DBPEDIA/en/short_abstracts_en.nt.bz2
+wget -c $DBPEDIA/de/instance_types_de.nt.bz2
+wget -c $DBPEDIA/de/labels_de.nt.bz2
+wget -c $DBPEDIA/de/short_abstracts_de.nt.bz2
+wget -c $DBPEDIA/de/images_de.nt.bz2
 #wget -c $DBPEDIA/en/long_abstracts_en.not.bz2
 
 # special handling of the image file that has 5 corrupted entries
-if [ ! -f images_en.nt ]
-then
-    wget -c $DBPEDIA/en/images_en.nt.bz2
-    bzcat images_en.nt.bz2 \
-      | sed 's/\\\\/\\u005c\\u005c/g;s/\\\([^u"]\)/\\u005c\1/g' > images_en.nt
-    rm -f images_en.nt.bz2
-fi
-
-# same problem for german labels
 if [ ! -f labels_de.nt ]
 then
     wget -c $DBPEDIA/de/labels_de.nt.bz2
@@ -81,8 +64,8 @@ then
 fi
 
 # Type specific attributes
-wget -c $DBPEDIA/en/geo_coordinates_en.nt.bz2
-wget -c $DBPEDIA/en/persondata_en.nt.bz2
+wget -c $DBPEDIA/de/geo_coordinates_de.nt.bz2
+wget -c $DBPEDIA/de/persondata_de.nt.bz2
 
 # Category information
 #wget -c $DBPEDIA/en/category_labels_en.nt.bz2

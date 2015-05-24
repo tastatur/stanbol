@@ -25,6 +25,12 @@ MAX_SORT_MEM=4G
 # Turn on echoing and exit on error
 set -x -e -o pipefail
 
+# Ensure that the workspace exists
+mkdir -p $WORKSPACE
+
+# Create the folder structure under the workspace folder
+cd $WORKSPACE
+
 # The language to build the index
 LANGUAGE=$1
 INCOMING_FILE=${WORKSPACE}/incoming_links.txt

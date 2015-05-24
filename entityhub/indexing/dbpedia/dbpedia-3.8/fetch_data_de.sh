@@ -16,14 +16,34 @@
 # limitations under the License.
 
 
-INDEXING_JAR=./org.apache.stanbol.entityhub.indexing.dbpedia-*-jar-with-dependencies.jar
-WORKSPACE=.
+INDEXING_JAR=`pwd`/target/org.apache.stanbol.entityhub.indexing.dbpedia-0.12.1-SNAPSHOT.jar
+WORKSPACE=/tmp/dbpedia-index
 DBPEDIA=http://downloads.dbpedia.org/3.8
 
 # Turn on echoing and exit on error
 set -x -e -o pipefail
 
+# Ensure that the workspace exists
+mkdir -p $WORKSPACE
+
+# Create the folder structure under the workspace folder
+cd $WORKSPACE
+
 java -jar $INDEXING_JAR init
+
+
+# Rank entities by popularity by counting the number of incoming links in the
+# wikipedia graph: computing this takes around 2 hours
+if [ ! -f $WORKSPACE/indexing/resources/incoming_links.txt ]
+then
+    curl $DBPEDIA/de/page_links_de.nt.bz2 \
+        | bzcat \
+        | sed 's/\\\\/\\u005c\\u005c/g;s/\\\([^u"]\)/\\u005c\1/g' \
+        | sed -e 's/.*<http\:\/\/dbpedia\.org\/resource\/\([^>]*\)> ./\1/' \
+        | sort -S $MAX_SORT_MEM \
+        | uniq -c  \
+        | sort -nr -S $MAX_SORT_MEM > $WORKSPACE/indexing/resources/incoming_links.txt
+fi
 
 # Download the RDF dumps:
 cd $WORKSPACE/indexing/resources/rdfdata
@@ -39,6 +59,7 @@ files=(dbpedia_3.8.owl \
     de/instance_types_de.nt \
     en/images_en.nt \
     de/images_de.nt \
+    de/persondata_de.nt \
     en/geo_coordinates_en.nt \
     de/geo_coordinates_de.nt \
     en/redirects_en.nt \

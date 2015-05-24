@@ -17,7 +17,7 @@
 
 echo ">> Building incoming links File <<"
 
-WORKSPACE=.
+WORKSPACE=/tmp/dbpedia-index
 DBPEDIA=http://downloads.dbpedia.org/3.8
 
 MAX_SORT_MEM=4G
@@ -27,7 +27,7 @@ set -x -e -o pipefail
 
 # The language to build the index
 LANGUAGE=$1
-INCOMING_FILE=${WORKSPACE}/incoming_links_${LANGUAGE}.txt
+INCOMING_FILE=${WORKSPACE}/incoming_links.txt
 
 #prpair Page_Links
 PAGE_LINKS=page_links_${LANGUAGE}.nt

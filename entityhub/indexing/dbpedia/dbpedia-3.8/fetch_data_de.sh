@@ -32,20 +32,6 @@ cd $WORKSPACE
 
 java -jar $INDEXING_JAR init
 
-
-# Rank entities by popularity by counting the number of incoming links in the
-# wikipedia graph: computing this takes around 2 hours
-if [ ! -f $WORKSPACE/indexing/resources/incoming_links.txt ]
-then
-    curl $DBPEDIA/de/page_links_de.nt.bz2 \
-        | bzcat \
-        | sed 's/\\\\/\\u005c\\u005c/g;s/\\\([^u"]\)/\\u005c\1/g' \
-        | sed -e 's/.*<http\:\/\/dbpedia\.org\/resource\/\([^>]*\)> ./\1/' \
-        | sort -S $MAX_SORT_MEM \
-        | uniq -c  \
-        | sort -nr -S $MAX_SORT_MEM > $WORKSPACE/indexing/resources/incoming_links.txt
-fi
-
 # Download the RDF dumps:
 cd $WORKSPACE/indexing/resources/rdfdata
 

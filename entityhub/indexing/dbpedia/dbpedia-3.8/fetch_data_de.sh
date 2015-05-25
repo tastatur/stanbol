@@ -17,7 +17,7 @@
 
 
 INDEXING_JAR=`pwd`/target/org.apache.stanbol.entityhub.indexing.dbpedia-0.12.1-SNAPSHOT.jar
-WORKSPACE=/tmp/dbpedia-index
+WORKSPACE=~/tmp/dbpedia-index
 DBPEDIA=http://downloads.dbpedia.org/3.8
 MAX_SORT_MEM=2G
 

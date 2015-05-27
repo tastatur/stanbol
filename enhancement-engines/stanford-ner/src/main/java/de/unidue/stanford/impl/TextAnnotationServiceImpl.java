@@ -1,5 +1,6 @@
 package de.unidue.stanford.impl;
 
+import de.unidue.stanford.StanfordNerTypeToDcType;
 import de.unidue.stanford.TextAnnotationService;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -39,15 +40,18 @@ public class TextAnnotationServiceImpl implements TextAnnotationService {
             extractedEntities.forEach(ner -> {
                 String name = ner.get(CoreAnnotations.TextAnnotation.class);
                 String context = ner.get(CoreAnnotations.CharAnnotation.class);
+                String nerType = ner.get(CoreAnnotations.AnswerAnnotation.class);
                 Integer start = ner.get(CoreAnnotations.CharacterOffsetBeginAnnotation.class);
                 Integer end = ner.get(CoreAnnotations.CharacterOffsetEndAnnotation.class);
 
                 UriRef textAnnotation = EnhancementEngineHelper.createTextEnhancement(ci, engine);
+                UriRef dcType = new StanfordNerTypeToDcType().apply(nerType);
 
                 graph.add(new TripleImpl(textAnnotation, ENHANCER_SELECTED_TEXT, new PlainLiteralImpl(name, deLang)));
                 graph.add(new TripleImpl(textAnnotation, ENHANCER_SELECTION_CONTEXT, new PlainLiteralImpl(context, deLang)));
                 graph.add(new TripleImpl(textAnnotation, ENHANCER_START, literalFactory.createTypedLiteral(start)));
                 graph.add(new TripleImpl(textAnnotation, ENHANCER_END, literalFactory.createTypedLiteral(end)));
+                graph.add(new TripleImpl(textAnnotation, DC_TYPE, dcType));
             });
         } finally {
             ci.getLock().writeLock().unlock();

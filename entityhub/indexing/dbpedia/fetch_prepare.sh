@@ -38,7 +38,7 @@ then
     curl $DBPEDIA/de/page_links_de.nt.bz2 \
         | bzcat \
         | sed -e 's/.*<http\:\/\/dbpedia\.org\/resource\/\([^>]*\)> ./\1/' \
-        | sed -e 's/CAT:/Category:/g' |
+        | sed -e 's/CAT:/Category:/g' \
         | sort -S $MAX_SORT_MEM \
         | uniq -c  \
         | sort -nr -S $MAX_SORT_MEM > $WORKSPACE/indexing/resources/incoming_links.txt

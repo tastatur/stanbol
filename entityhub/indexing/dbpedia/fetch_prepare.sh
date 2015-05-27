@@ -35,8 +35,8 @@ java -jar $INDEXING_JAR init
 # wikipedia graph: computing this takes around 2 hours
 if [ ! -f $WORKSPACE/indexing/resources/incoming_links.txt ]
 then
-    curl $DBPEDIA/de/page_links_de.nt.bz2 \
-        | bzcat \
+    wget-O $WORKSPACE/indexing/resources/page_links_de.nt.bz2 $DBPEDIA/de/page_links_de.nt.bz2
+    bzcat $WORKSPACE/indexing/resources/page_links_de.nt.bz2  \
         | sed -e 's/.*<http\:\/\/dbpedia\.org\/resource\/\([^>]*\)> ./\1/' \
         | sed -e 's/CAT:/Category:/g' \
         | sort -S $MAX_SORT_MEM \

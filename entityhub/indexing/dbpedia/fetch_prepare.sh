@@ -17,8 +17,8 @@
 
 
 INDEXING_JAR=`pwd`/target/org.apache.stanbol.entityhub.indexing.dbpedia-0.12.1-SNAPSHOT.jar
-WORKSPACE=/tmp/dbpedia-index
-DBPEDIA=http://downloads.dbpedia.org/3.7
+WORKSPACE=~/tmp/dbpedia-index
+DBPEDIA=http://downloads.dbpedia.org/3.9
 MAX_SORT_MEM=2G
 
 # Turn on echoing and exit on error
@@ -38,6 +38,7 @@ then
     curl $DBPEDIA/de/page_links_de.nt.bz2 \
         | bzcat \
         | sed -e 's/.*<http\:\/\/dbpedia\.org\/resource\/\([^>]*\)> ./\1/' \
+        | sed -e 's/CAT:/Category:/g' |
         | sort -S $MAX_SORT_MEM \
         | uniq -c  \
         | sort -nr -S $MAX_SORT_MEM > $WORKSPACE/indexing/resources/incoming_links.txt
@@ -47,33 +48,24 @@ fi
 cd $WORKSPACE/indexing/resources/rdfdata
 
 # General attributes for all entities
-wget -c $DBPEDIA/dbpedia_3.7.owl.bz2
+wget -c $DBPEDIA/dbpedia_3.9.owl.bz2
 wget -c $DBPEDIA/de/instance_types_de.nt.bz2
 wget -c $DBPEDIA/de/labels_de.nt.bz2
 wget -c $DBPEDIA/de/short_abstracts_de.nt.bz2
 wget -c $DBPEDIA/de/images_de.nt.bz2
-#wget -c $DBPEDIA/en/long_abstracts_en.not.bz2
-
-# special handling of the image file that has 5 corrupted entries
-if [ ! -f labels_de.nt ]
-then
-    wget -c $DBPEDIA/de/labels_de.nt.bz2
-    bzcat labels_de.nt.bz2 \
-      | sed 's/\\\\/\\u005c\\u005c/g;s/\\\([^u"]\)/\\u005c\1/g' > labels_de.nt
-    rm -f labels_de.nt.bz2
-fi
+wget -c $DBPEDIA/de/long_abstracts_de.not.bz2
 
 # Type specific attributes
 wget -c $DBPEDIA/de/geo_coordinates_de.nt.bz2
 wget -c $DBPEDIA/de/persondata_de.nt.bz2
 
 # Category information
-#wget -c $DBPEDIA/en/category_labels_en.nt.bz2
-#wget -c $DBPEDIA/en/skos_categories_en.nt.bz2
-#wget -c $DBPEDIA/en/article_categories_en.nt.bz2
+wget -c $DBPEDIA/de/category_labels_de.nt.bz2
+wget -c $DBPEDIA/de/skos_categories_de.nt.bz2
+wget -c $DBPEDIA/de/article_categories_de.nt.bz2
 
 # Redirects
-wget -c $DBPEDIA/en/redirects_en.nt.bz2
+wget -c $DBPEDIA/de/redirects_de.nt.bz2
 
 set +xe
 

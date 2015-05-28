@@ -37,7 +37,7 @@ cd $WORKSPACE/indexing/resources/rdfdata
 
 # General attributes for all entities
 
-files=(dbpedia_3.8.owl \
+files=(dbpedia_3.9.owl \
     en/labels_en.nt \
     de/labels_de.nt \
     en/short_abstracts_en.nt \

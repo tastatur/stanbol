@@ -53,7 +53,7 @@ wget -c $DBPEDIA/de/instance_types_de.nt.bz2
 wget -c $DBPEDIA/de/labels_de.nt.bz2
 wget -c $DBPEDIA/de/short_abstracts_de.nt.bz2
 wget -c $DBPEDIA/de/images_de.nt.bz2
-wget -c $DBPEDIA/de/long_abstracts_de.not.bz2
+wget -c $DBPEDIA/de/long_abstracts_de.nt.bz2
 
 # Type specific attributes
 wget -c $DBPEDIA/de/geo_coordinates_de.nt.bz2

@@ -18,7 +18,7 @@
 
 INDEXING_JAR=`pwd`/target/org.apache.stanbol.entityhub.indexing.dbpedia-0.12.1-SNAPSHOT.jar
 WORKSPACE=~/tmp/dbpedia-index
-DBPEDIA=http://downloads.dbpedia.org/3.9
+DBPEDIA=http://downloads.dbpedia.org/3.8
 MAX_SORT_MEM=2G
 
 # Turn on echoing and exit on error
@@ -37,7 +37,7 @@ cd $WORKSPACE/indexing/resources/rdfdata
 
 # General attributes for all entities
 
-files=(dbpedia_3.9.owl \
+files=(dbpedia_3.8.owl \
     en/labels_en.nt \
     de/labels_de.nt \
     en/short_abstracts_en.nt \

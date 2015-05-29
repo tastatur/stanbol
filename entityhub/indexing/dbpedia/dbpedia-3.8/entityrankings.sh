@@ -18,7 +18,7 @@
 echo ">> Building incoming links File <<"
 
 WORKSPACE=~/tmp/dbpedia-index/indexing/resources/
-DBPEDIA=http://downloads.dbpedia.org/3.9
+DBPEDIA=http://downloads.dbpedia.org/3.8
 
 MAX_SORT_MEM=4G
 

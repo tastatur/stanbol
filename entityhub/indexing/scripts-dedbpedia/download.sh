@@ -23,6 +23,7 @@ files=(
   http://de.dbpedia.org/downloads/20140813/dewiki-20140813-page-links.nt.gz \
   http://de.dbpedia.org/downloads/20140813/dewiki-20140813-persondata.nt.gz \
   http://de.dbpedia.org/downloads/20140813/dewiki-20140813-pnd.nt.gz \
+  http://de.dbpedia.org/downloads/20140813/dewiki-20140813-redirects.nt.gz \
   http://de.dbpedia.org/downloads/20140813/dewiki-20140813-revision-ids.nt.gz \
   http://de.dbpedia.org/downloads/20140813/dewiki-20140813-revision-uris.nt.gz \
   http://de.dbpedia.org/downloads/20140813/dewiki-20140813-short-abstracts.nt.gz \

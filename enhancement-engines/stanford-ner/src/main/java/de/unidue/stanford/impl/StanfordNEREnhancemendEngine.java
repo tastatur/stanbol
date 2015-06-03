@@ -3,9 +3,11 @@ package de.unidue.stanford.impl;
 import de.unidue.stanford.NameOccurrenceUtility;
 import de.unidue.stanford.TextAnnotationService;
 import edu.stanford.nlp.ie.AbstractSequenceClassifier;
+import edu.stanford.nlp.ie.NERClassifierCombiner;
 import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.ling.CoreLabel;
 import org.apache.felix.scr.annotations.*;
+import org.apache.felix.scr.annotations.Properties;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
 import org.apache.stanbol.enhancer.nlp.model.AnalysedTextFactory;
 import org.apache.stanbol.enhancer.nlp.utils.NlpEngineHelper;
@@ -21,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.*;
 
 @Component(immediate = true, metatype = true)
 @Service
@@ -33,7 +35,7 @@ import java.util.List;
 public class StanfordNEREnhancemendEngine extends AbstractEnhancementEngine<RuntimeException, RuntimeException> implements EnhancementEngine {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    private AbstractSequenceClassifier<CoreLabel> classifier;
+    private NERClassifierCombiner classifier;
 
     @SuppressWarnings("all")
     @Reference
@@ -53,10 +55,14 @@ public class StanfordNEREnhancemendEngine extends AbstractEnhancementEngine<Runt
         super.activate(ce);
 
         @SuppressWarnings("all")
-        String classifierPath = getClass().getClassLoader().getResource("classifiers/edu/stanford/nlp/models/ner/german.dewac_175m_600.crf.ser.gz").getPath();
+        String dewacClassifier = getClass().getClassLoader().getResource("classifiers/edu/stanford/nlp/models/ner/german.dewac_175m_600.crf.ser.gz").getPath();
+        @SuppressWarnings("all")
+        String hgcClassifier = getClass().getClassLoader().getResource("classifiers/edu/stanford/nlp/models/ner/german.hgc_175m_600.crf.ser.gz").getPath();
         try {
-            classifier = CRFClassifier.getClassifier(classifierPath);
-        } catch (IOException | ClassNotFoundException e) {
+            java.util.Properties nerProps = new java.util.Properties();
+            nerProps.setProperty("ner.model", dewacClassifier.concat(",").concat(hgcClassifier));
+            classifier = NERClassifierCombiner.createNERClassifierCombiner(null, nerProps);
+        } catch (Exception e) {
             log.error("Can't activate stanford NER!");
             throw new RuntimeException(e);
         }

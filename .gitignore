@@ -10,3 +10,4 @@ dependency-reduced-pom.xml
 *.ipr
 *.iws
 .idea
+launchers/full-war/overlays/

@@ -11,6 +11,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>stanford-ner</artifactId>
+    <groupId>de.unidue.stanbol</groupId>
     <name>Stanford NER</name>
     <description>Use stanford NER to extract German entitys</description>
     <packaging>bundle</packaging>
@@ -39,7 +40,7 @@
                             *
                         </Import-Package>
                         <Export-Package>
-                            de.unidue.stanford.*; version="0.12"
+                            de.unidue.stanbol.*; version="0.12"
                         </Export-Package>
                         <Embed-Dependency>
                             stanford-ner,stanford-resources,jollyday,joda-time,joda-convert

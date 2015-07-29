@@ -1,4 +1,4 @@
-package de.unidue.stanford;
+package de.unidue.stanbol.stanford;
 
 import org.apache.clerezza.rdf.core.UriRef;
 import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;

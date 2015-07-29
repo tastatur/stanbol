@@ -1,4 +1,4 @@
-package de.unidue.stanford;
+package de.unidue.stanbol.stanford;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;

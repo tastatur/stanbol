@@ -1,6 +1,6 @@
-package de.unidue.stanford.impl;
+package de.unidue.stanbol.stanford.impl;
 
-import de.unidue.stanford.NameOccurrenceUtility;
+import de.unidue.stanbol.stanford.NameOccurrenceUtility;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.sequences.SeqClassifierFlags;

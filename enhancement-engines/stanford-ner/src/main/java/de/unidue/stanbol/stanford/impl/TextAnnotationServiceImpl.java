@@ -1,7 +1,7 @@
-package de.unidue.stanford.impl;
+package de.unidue.stanbol.stanford.impl;
 
-import de.unidue.stanford.StanfordNerTypeToDcType;
-import de.unidue.stanford.TextAnnotationService;
+import de.unidue.stanbol.stanford.StanfordNerTypeToDcType;
+import de.unidue.stanbol.stanford.TextAnnotationService;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import org.apache.clerezza.rdf.core.Language;

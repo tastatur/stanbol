@@ -1,10 +1,8 @@
-package de.unidue.stanford.impl;
+package de.unidue.stanbol.stanford.impl;
 
-import de.unidue.stanford.NameOccurrenceUtility;
-import de.unidue.stanford.TextAnnotationService;
-import edu.stanford.nlp.ie.AbstractSequenceClassifier;
+import de.unidue.stanbol.stanford.NameOccurrenceUtility;
+import de.unidue.stanbol.stanford.TextAnnotationService;
 import edu.stanford.nlp.ie.NERClassifierCombiner;
-import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.ling.CoreLabel;
 import org.apache.felix.scr.annotations.*;
 import org.apache.felix.scr.annotations.Properties;
@@ -22,7 +20,6 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.*;
 
 @Component(immediate = true, metatype = true)

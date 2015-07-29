@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>apache-stanbol-bundlelists</artifactId>
+        <groupId>org.apache.stanbol</groupId>
+        <version>0.12.1-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>de.unidue.stanbol.bundle</groupId>
+    <artifactId>germanbundle</artifactId>
+
+    <packaging>partialbundlelist</packaging>
+    <name>German language support</name>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.sling</groupId>
+                <artifactId>maven-launchpad-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

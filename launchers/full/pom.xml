@@ -334,6 +334,14 @@
       <type>partialbundlelist</type>
       <scope>provided</scope>
     </dependency>
+
+    <dependency>
+      <groupId>de.unidue.stanbol.bundle</groupId>
+      <artifactId>germanbundle</artifactId>
+      <version>0.12.1-SNAPSHOT</version>
+      <type>partialbundlelist</type>
+      <scope>provided</scope>
+    </dependency>
     
   </dependencies>
 </project>

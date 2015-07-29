@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<bundles>
+    <startLevel level="32">
+        <bundle>
+            <artifactId>stanford-ner</artifactId>
+            <groupId>de.unidue.stanbol</groupId>
+            <version>0.12.1-SNAPSHOT</version>
+        </bundle>
+    </startLevel>
+</bundles>

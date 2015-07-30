@@ -81,7 +81,7 @@ public class EventJobManagerImpl implements EnhancementJobManager {
     /**
      * default max wait time is 60sec (similar to the http timeout)
      */
-    public static final int DEFAULT_MAX_ENHANCEMENT_JOB_WAIT_TIME = 60 * 1000;
+    public static final int DEFAULT_MAX_ENHANCEMENT_JOB_WAIT_TIME = Integer.MAX_VALUE;
     
     @Reference
     protected ChainManager chainManager;

@@ -11,3 +11,6 @@ dependency-reduced-pom.xml
 *.iws
 .idea
 launchers/full-war/overlays/
+
+#MITIE wird kompiliert
+enhancement-engines/mitie-enhancer/lib/javamitie.jar

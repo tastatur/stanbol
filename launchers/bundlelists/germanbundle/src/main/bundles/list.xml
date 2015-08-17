@@ -6,5 +6,10 @@
             <groupId>de.unidue.stanbol</groupId>
             <version>0.12.1-SNAPSHOT</version>
         </bundle>
+        <bundle>
+            <artifactId>mitie-enhancer</artifactId>
+            <groupId>de.unidue.stanbol</groupId>
+            <version>0.12.1-SNAPSHOT</version>
+        </bundle>
     </startLevel>
 </bundles>

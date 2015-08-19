@@ -2,7 +2,7 @@ package de.unidue.stanbol.stanford.impl;
 
 import de.unidue.stanbol.stanford.NameOccurrenceUtility;
 import de.unidue.stanbol.stanford.StanfordEnhancemendMode;
-import de.unidue.stanbol.stanford.TextAnnotationService;
+import de.unidue.stanbol.stanford.StanfordTextAnnotationService;
 import edu.stanford.nlp.ie.NERClassifierCombiner;
 import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -59,7 +59,7 @@ public class StanfordNEREnhancemendEngine extends AbstractEnhancementEngine<Runt
 
     @SuppressWarnings("all")
     @Reference
-    private TextAnnotationService textAnnotationService;
+    private StanfordTextAnnotationService stanfordTextAnnotationService;
 
     @SuppressWarnings("all")
     @Reference
@@ -140,6 +140,6 @@ public class StanfordNEREnhancemendEngine extends AbstractEnhancementEngine<Runt
             labeledTokens = singleClassifier.classify(analysedText.getText().toString());
         }
         List<CoreLabel> extractedEntities = nameOccurrenceUtility.mergeTokens(labeledTokens);
-        textAnnotationService.populateTextAnnotations(extractedEntities, ci, this);
+        stanfordTextAnnotationService.populateTextAnnotations(extractedEntities, ci, this);
     }
 }

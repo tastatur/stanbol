@@ -6,6 +6,6 @@ import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
 
 import java.util.List;
 
-public interface TextAnnotationService {
+public interface StanfordTextAnnotationService {
     void populateTextAnnotations(List<CoreLabel> extractedEntities, ContentItem ci, EnhancementEngine engine);
 }

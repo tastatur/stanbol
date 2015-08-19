@@ -1,7 +1,13 @@
 package de.unidue.stanbol.mitie.impl;
 
+import de.unidue.stanbol.mitie.MitieTextAnnotationService;
+import edu.mit.ll.mitie.EntityMention;
+import edu.mit.ll.mitie.EntityMentionVector;
 import edu.mit.ll.mitie.NamedEntityExtractor;
+import edu.mit.ll.mitie.StringVector;
 import org.apache.felix.scr.annotations.*;
+import org.apache.stanbol.enhancer.nlp.model.AnalysedText;
+import org.apache.stanbol.enhancer.nlp.model.AnalysedTextUtils;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
 import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
@@ -10,6 +16,10 @@ import org.apache.stanbol.enhancer.servicesapi.impl.AbstractEnhancementEngine;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.nio.file.Paths;
 
 @Component(
         metatype = true,
@@ -26,19 +36,27 @@ import org.osgi.service.component.ComponentContext;
 public class MitieEnhancementEngine extends AbstractEnhancementEngine<RuntimeException, RuntimeException> implements EnhancementEngine {
 
     public static final String MODEL_FILE_PROP = "enhancer.engines.mitie.model";
+    private static final String DATAFILES_DIR = "stanbol/datafiles/";
 
     private NamedEntityExtractor ner;
+
+    @SuppressWarnings("all")
+    @Reference
+    private MitieTextAnnotationService mitieTextAnnotationService;
 
     @Activate
     @Override
     protected void activate(ComponentContext ce) throws ConfigurationException {
-        ner = new NamedEntityExtractor(ce.getProperties().get(MODEL_FILE_PROP).toString());
+        final String modelFile = ce.getProperties().get(MODEL_FILE_PROP).toString();
+        final String modelPath = Paths.get(DATAFILES_DIR.concat(modelFile)).toAbsolutePath().toString();
+        ner = new NamedEntityExtractor(modelPath);
     }
 
     @Override
     public int canEnhance(ContentItem contentItem) throws EngineException {
         final String lang = EnhancementEngineHelper.getLanguage(contentItem);
-        if ("de".equalsIgnoreCase(lang)) {
+        final AnalysedText at = AnalysedTextUtils.getAnalysedText(contentItem);
+        if ("de".equalsIgnoreCase(lang) && at != null && at.getTokens().hasNext()) {
             return ENHANCE_SYNCHRONOUS;
         }
         return CANNOT_ENHANCE;
@@ -46,5 +64,14 @@ public class MitieEnhancementEngine extends AbstractEnhancementEngine<RuntimeExc
 
     @Override
     public void computeEnhancements(ContentItem contentItem) throws EngineException {
+        final AnalysedText at = AnalysedTextUtils.getAnalysedText(contentItem);
+        final StringVector tokens = new StringVector();
+        at.getTokens().forEachRemaining(token -> tokens.add(token.getSpan()));
+        final EntityMentionVector entities = ner.extractEntities(tokens);
+        mitieTextAnnotationService.populateTextAnnotations(entities, tokens, contentItem, this);
+    }
+
+    public StringVector getPossibleTags() {
+        return ner.getPossibleNerTags();
     }
 }

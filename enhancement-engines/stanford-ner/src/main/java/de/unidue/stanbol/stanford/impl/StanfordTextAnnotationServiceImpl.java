@@ -1,7 +1,7 @@
 package de.unidue.stanbol.stanford.impl;
 
 import de.unidue.stanbol.stanford.StanfordNerTypeToDcType;
-import de.unidue.stanbol.stanford.TextAnnotationService;
+import de.unidue.stanbol.stanford.StanfordTextAnnotationService;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import org.apache.clerezza.rdf.core.Language;
@@ -24,11 +24,11 @@ import java.util.List;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.*;
 
 @Component(immediate = true)
-@Service(value = TextAnnotationService.class)
+@Service(value = StanfordTextAnnotationService.class)
 @Properties(value = {
         @Property(name = Constants.SERVICE_RANKING, intValue = Integer.MIN_VALUE)
 })
-public class TextAnnotationServiceImpl implements TextAnnotationService {
+public class StanfordTextAnnotationServiceImpl implements StanfordTextAnnotationService {
     private final Language deLang = new Language("de");
 
     @Override

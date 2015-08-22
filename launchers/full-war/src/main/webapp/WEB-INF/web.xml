@@ -33,7 +33,7 @@
         </init-param> 
 		<init-param> <!-- the default sling.home is set to stanbol -->
                 <param-name>sling.home</param-name> 
-                <param-value>stanbol/</param-value> 
+                <param-value>${stanbol.basedir}/stanbol/</param-value>
         </init-param> 
         <init-param> <!-- set the stanbol.home to the sling.home -->
                 <param-name>stanbol.home</param-name> 

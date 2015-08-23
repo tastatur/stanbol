@@ -36,7 +36,7 @@ import java.nio.file.Paths;
 public class MitieEnhancementEngine extends AbstractEnhancementEngine<RuntimeException, RuntimeException> implements EnhancementEngine {
 
     public static final String MODEL_FILE_PROP = "enhancer.engines.mitie.model";
-    private static final String DATAFILES_DIR = System.getProperty("stanbol.basedir").concat("/stanbol/datafiles/");
+    private static final String DATAFILES_DIR = System.getProperty("stanbol.basedir").concat("/datafiles/");
 
     private NamedEntityExtractor ner;
 

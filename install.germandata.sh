@@ -3,6 +3,7 @@
 
 INSTALLDIR=$1
 STANBOLDIR=/var/lib/stanbol-data/
+TOMCATUSER=tomcat8
 echo "Hallo! Ich installiere für dich den Index von de.dbpedia.org und Modellen für TIGER und PIG Engine. Die Dateien sind für git leider zu gross. :("
 mkdir -p $STANBOLDIR/datafiles/
 

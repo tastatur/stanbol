@@ -52,7 +52,7 @@
         </init-param> 
 		<init-param> <!-- the default sling.home is set to stanbol -->
                 <param-name>sling.home</param-name> 
-                <param-value>${stanbol.basedir}/</param-value>
+                <param-value>/var/lib/stanbol-data/</param-value>
         </init-param>
         <init-param> <!-- set the stanbol.home to the sling.home -->
             <param-name>stanbol.home</param-name>
@@ -70,9 +70,4 @@
         <servlet-name>stanbol</servlet-name>
         <url-pattern>/*</url-pattern>
     </servlet-mapping>
-
-    <context-param>
-        <param-name>stanbol.basedir</param-name>
-        <param-value>/var/lib/stanbol-data/</param-value>
-    </context-param>
 </web-app>

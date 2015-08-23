@@ -1,7 +1,6 @@
 package de.unidue.stanbol.mitie.impl;
 
 import de.unidue.stanbol.mitie.MitieTextAnnotationService;
-import edu.mit.ll.mitie.EntityMention;
 import edu.mit.ll.mitie.EntityMentionVector;
 import edu.mit.ll.mitie.NamedEntityExtractor;
 import edu.mit.ll.mitie.StringVector;
@@ -16,8 +15,6 @@ import org.apache.stanbol.enhancer.servicesapi.impl.AbstractEnhancementEngine;
 import org.osgi.framework.Constants;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.nio.file.Paths;
 
@@ -36,7 +33,6 @@ import java.nio.file.Paths;
 public class MitieEnhancementEngine extends AbstractEnhancementEngine<RuntimeException, RuntimeException> implements EnhancementEngine {
 
     public static final String MODEL_FILE_PROP = "enhancer.engines.mitie.model";
-    private static final String DATAFILES_DIR = System.getProperty("stanbol.basedir").concat("/datafiles/");
 
     private NamedEntityExtractor ner;
 
@@ -48,7 +44,8 @@ public class MitieEnhancementEngine extends AbstractEnhancementEngine<RuntimeExc
     @Override
     protected void activate(ComponentContext ce) throws ConfigurationException {
         final String modelFile = ce.getProperties().get(MODEL_FILE_PROP).toString();
-        final String modelPath = Paths.get(DATAFILES_DIR.concat(modelFile)).toAbsolutePath().toString();
+        final String modelsDataDir = ce.getBundleContext().getProperty("de.unidue.modelsdir");
+        final String modelPath = Paths.get(modelsDataDir.concat(modelFile)).toAbsolutePath().toString();
         ner = new NamedEntityExtractor(modelPath);
     }
 

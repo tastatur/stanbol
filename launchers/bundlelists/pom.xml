@@ -78,6 +78,7 @@
     <module>marmotta/kiwi</module>
 
     <!-- Specific features -->
+    <module>security</module>
     <module>zzshell</module>
     
     <!-- language specific extensions -->

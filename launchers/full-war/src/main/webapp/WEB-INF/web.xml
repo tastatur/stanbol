@@ -70,4 +70,9 @@
         <servlet-name>stanbol</servlet-name>
         <url-pattern>/*</url-pattern>
     </servlet-mapping>
+
+    <context-param>
+        <param-name>stanbol.basedir</param-name>
+        <param-value>/var/lib/stanbol-data/</param-value>
+    </context-param>
 </web-app>

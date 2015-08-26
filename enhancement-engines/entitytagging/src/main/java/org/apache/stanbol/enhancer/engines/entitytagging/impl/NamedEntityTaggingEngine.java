@@ -16,43 +16,13 @@
  */
 package org.apache.stanbol.enhancer.engines.entitytagging.impl;
 
-import static org.apache.commons.lang.StringUtils.getLevenshteinDistance;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses.DBPEDIA_ORGANISATION;
-import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Dictionary;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.NonLiteral;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.*;
 import org.apache.commons.lang.StringUtils;
-import org.apache.felix.scr.annotations.Activate;
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Deactivate;
-import org.apache.felix.scr.annotations.Property;
-import org.apache.felix.scr.annotations.Reference;
-import org.apache.felix.scr.annotations.ReferenceCardinality;
-import org.apache.felix.scr.annotations.ReferencePolicy;
-import org.apache.felix.scr.annotations.ReferenceStrategy;
-import org.apache.felix.scr.annotations.Service;
+import org.apache.felix.scr.annotations.*;
 import org.apache.stanbol.commons.namespaceprefix.NamespaceMappingUtils;
 import org.apache.stanbol.commons.namespaceprefix.NamespacePrefixService;
 import org.apache.stanbol.commons.stanboltools.offline.OfflineMode;
-import org.apache.stanbol.enhancer.servicesapi.ContentItem;
-import org.apache.stanbol.enhancer.servicesapi.EngineException;
-import org.apache.stanbol.enhancer.servicesapi.EnhancementEngine;
-import org.apache.stanbol.enhancer.servicesapi.EnhancementJobManager;
-import org.apache.stanbol.enhancer.servicesapi.ServiceProperties;
+import org.apache.stanbol.enhancer.servicesapi.*;
 import org.apache.stanbol.enhancer.servicesapi.helper.EnhancementEngineHelper;
 import org.apache.stanbol.enhancer.servicesapi.impl.AbstractEnhancementEngine;
 import org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses;
@@ -61,16 +31,12 @@ import org.apache.stanbol.enhancer.servicesapi.rdf.TechnicalClasses;
 import org.apache.stanbol.entityhub.model.clerezza.RdfValueFactory;
 import org.apache.stanbol.entityhub.servicesapi.Entityhub;
 import org.apache.stanbol.entityhub.servicesapi.EntityhubException;
+import org.apache.stanbol.entityhub.servicesapi.defaults.DataTypeEnum;
 import org.apache.stanbol.entityhub.servicesapi.model.Entity;
 import org.apache.stanbol.entityhub.servicesapi.model.Representation;
 import org.apache.stanbol.entityhub.servicesapi.model.Text;
 import org.apache.stanbol.entityhub.servicesapi.model.rdf.RdfResourceEnum;
-import org.apache.stanbol.entityhub.servicesapi.query.Constraint;
-import org.apache.stanbol.entityhub.servicesapi.query.FieldQuery;
-import org.apache.stanbol.entityhub.servicesapi.query.FieldQueryFactory;
-import org.apache.stanbol.entityhub.servicesapi.query.QueryResultList;
-import org.apache.stanbol.entityhub.servicesapi.query.ReferenceConstraint;
-import org.apache.stanbol.entityhub.servicesapi.query.TextConstraint;
+import org.apache.stanbol.entityhub.servicesapi.query.*;
 import org.apache.stanbol.entityhub.servicesapi.site.Site;
 import org.apache.stanbol.entityhub.servicesapi.site.SiteException;
 import org.apache.stanbol.entityhub.servicesapi.site.SiteManager;
@@ -80,17 +46,24 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.*;
+import java.util.Map.Entry;
+
+import static org.apache.commons.lang.StringUtils.getLevenshteinDistance;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.OntologicalClasses.DBPEDIA_ORGANISATION;
+import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.RDF_TYPE;
+
 /**
  * Engine that uses a {@link Site} to search for entities for existing TextAnnotations of an Content Item.
- * 
+ *
  * @author ogrisel, rwesten
  */
-@Component(configurationFactory = true, 
-    policy = ConfigurationPolicy.REQUIRE, // the baseUri is required!
-    specVersion = "1.1", metatype = true, immediate = true, inherit = true)
+@Component(configurationFactory = true,
+        policy = ConfigurationPolicy.REQUIRE, // the baseUri is required!
+        specVersion = "1.1", metatype = true, immediate = true, inherit = true)
 @Service
 @org.apache.felix.scr.annotations.Properties(value = {@Property(name = EnhancementEngine.PROPERTY_NAME)})
-public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeException,RuntimeException>
+public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeException, RuntimeException>
         implements EnhancementEngine, ServiceProperties {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -123,6 +96,7 @@ public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeE
 
     /**
      * Use the RDFS label as default
+     *
      * @deprecated Use a dereference engine instead (STANBOL-336)
      */
     @Deprecated
@@ -131,6 +105,10 @@ public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeE
 
     @Property(intValue = 0)
     public static final String SERVICE_RANKING = Constants.SERVICE_RANKING;
+
+    @Property
+    public static final String USE_SIMILARITY_SEARCH = "org.apache.stanbol.enhancer.engines.entitytagging.useSimConstraint";
+
     /**
      * The default language for labels included in the enhancement metadata (if not available for the parsed
      * content).
@@ -150,9 +128,9 @@ public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeE
     @Reference
     protected Entityhub entityhub;
 
-    @Reference(cardinality=ReferenceCardinality.OPTIONAL_UNARY)
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY)
     protected NamespacePrefixService nsPrefixService;
-    
+
     /**
      * This holds the id of the {@link Site} used to lookup Entities or <code>null</code> if the
      * {@link Entityhub} is used.
@@ -214,11 +192,13 @@ public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeE
      */
     protected boolean dereferenceEntities = false;
 
+    protected boolean useSimilarityQuery = false;
+
     /**
      * The {@link OfflineMode} is used by Stanbol to indicate that no external service should be referenced.
      * For this engine that means it is necessary to check if the used {@link Site} can operate offline or
      * not.
-     * 
+     *
      * @see #enableOfflineMode(OfflineMode)
      * @see #disableOfflineMode(OfflineMode)
      */
@@ -227,7 +207,7 @@ public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeE
 
     /**
      * Called by the ConfigurationAdmin to bind the {@link #offlineMode} if the service becomes available
-     * 
+     *
      * @param mode
      */
     protected final void enableOfflineMode(OfflineMode mode) {
@@ -236,7 +216,7 @@ public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeE
 
     /**
      * Called by the ConfigurationAdmin to unbind the {@link #offlineMode} if the service becomes unavailable
-     * 
+     *
      * @param mode
      */
     protected final void disableOfflineMode(OfflineMode mode) {
@@ -245,7 +225,7 @@ public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeE
 
     /**
      * Returns <code>true</code> only if Stanbol operates in {@link OfflineMode} .
-     * 
+     *
      * @return the offline state
      */
     protected final boolean isOfflineMode() {
@@ -256,11 +236,15 @@ public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeE
     @Activate
     protected void activate(ComponentContext context) throws ConfigurationException {
         super.activate(context);
-        Dictionary<String,Object> config = context.getProperties();
+        Dictionary<String, Object> config = context.getProperties();
         Object referencedSiteID = config.get(REFERENCED_SITE_ID);
         if (referencedSiteID == null) {
             throw new ConfigurationException(REFERENCED_SITE_ID,
                     "The ID of the Referenced Site is a required Parameter and MUST NOT be NULL!");
+        }
+
+        if (config.get(USE_SIMILARITY_SEARCH) != null) {
+            useSimilarityQuery = Boolean.parseBoolean(config.get(USE_SIMILARITY_SEARCH).toString());
         }
 
         this.referencedSiteID = referencedSiteID.toString();
@@ -279,24 +263,24 @@ public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeE
         state = config.get(PLACE_STATE);
         placeState = state == null ? true : Boolean.parseBoolean(state.toString());
         Object type = config.get(PERSON_TYPE);
-        personType = type == null || type.toString().isEmpty() ? null : 
-            NamespaceMappingUtils.getConfiguredUri(nsPrefixService,PERSON_TYPE, type.toString());
+        personType = type == null || type.toString().isEmpty() ? null :
+                NamespaceMappingUtils.getConfiguredUri(nsPrefixService, PERSON_TYPE, type.toString());
         type = config.get(ORG_TYPE);
-        orgType = type == null || type.toString().isEmpty() ? null : 
-            NamespaceMappingUtils.getConfiguredUri(nsPrefixService,ORG_TYPE,type.toString());
+        orgType = type == null || type.toString().isEmpty() ? null :
+                NamespaceMappingUtils.getConfiguredUri(nsPrefixService, ORG_TYPE, type.toString());
         type = config.get(PLACE_TYPE);
-        placeType = type == null || type.toString().isEmpty() ? null : 
-            NamespaceMappingUtils.getConfiguredUri(nsPrefixService,PLACE_TYPE,type.toString());
+        placeType = type == null || type.toString().isEmpty() ? null :
+                NamespaceMappingUtils.getConfiguredUri(nsPrefixService, PLACE_TYPE, type.toString());
         Object nameField = config.get(NAME_FIELD);
-        this.nameField = nameField == null || nameField.toString().isEmpty() ? 
-                "http://www.w3.org/2000/01/rdf-schema#label" : 
-                    NamespaceMappingUtils.getConfiguredUri(nsPrefixService,NAME_FIELD,nameField.toString());
+        this.nameField = nameField == null || nameField.toString().isEmpty() ?
+                "http://www.w3.org/2000/01/rdf-schema#label" :
+                NamespaceMappingUtils.getConfiguredUri(nsPrefixService, NAME_FIELD, nameField.toString());
         Object dereferenceEntities = config.get(DEREFERENCE_ENTITIES);
         this.dereferenceEntities = state == null ? true : Boolean
                 .parseBoolean(dereferenceEntities.toString());
-        if(this.dereferenceEntities){
+        if (this.dereferenceEntities) {
             log.warn("DereferenceEntities is deprecated for this Enigne. Please use "
-                + "the EntityhubDereferenceEngine instead (see STANBOL-1223 for details)");
+                    + "the EntityhubDereferenceEngine instead (see STANBOL-1223 for details)");
         }
     }
 
@@ -311,7 +295,6 @@ public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeE
     }
 
 
-    
     public void computeEnhancements(ContentItem ci) throws EngineException {
         final Site site;
         if (referencedSiteID != null) { // lookup the referenced site
@@ -319,8 +302,8 @@ public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeE
             // ensure that it is present
             if (site == null) {
                 String msg = String.format(
-                    "Unable to enhance %s because Referenced Site %s is currently not active!", ci.getUri()
-                            .getUnicodeString(), referencedSiteID);
+                        "Unable to enhance %s because Referenced Site %s is currently not active!", ci.getUri()
+                                .getUnicodeString(), referencedSiteID);
                 log.warn(msg);
                 // TODO: throwing Exceptions is currently deactivated. We need a
                 // more clear
@@ -331,8 +314,8 @@ public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeE
             // and that it supports offline mode if required
             if (isOfflineMode() && !site.supportsLocalMode()) {
                 log.warn(
-                    "Unable to enhance ci {} because OfflineMode is not supported by ReferencedSite {}.", ci
-                            .getUri().getUnicodeString(), site.getId());
+                        "Unable to enhance ci {} because OfflineMode is not supported by ReferencedSite {}.", ci
+                                .getUri().getUnicodeString(), site.getId());
                 return;
             }
         } else { // null indicates to use the Entityhub to lookup Entities
@@ -341,7 +324,7 @@ public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeE
         MGraph graph = ci.getMetadata();
         LiteralFactory literalFactory = LiteralFactory.getInstance();
         // Retrieve the existing text annotations (requires read lock)
-        Map<NamedEntity,List<UriRef>> textAnnotations = new HashMap<NamedEntity,List<UriRef>>();
+        Map<NamedEntity, List<UriRef>> textAnnotations = new HashMap<NamedEntity, List<UriRef>>();
         // the language extracted for the parsed content or NULL if not
         // available
         String contentLangauge;
@@ -349,7 +332,7 @@ public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeE
         try {
             contentLangauge = EnhancementEngineHelper.getLanguage(ci);
             for (Iterator<Triple> it = graph.filter(null, RDF_TYPE, TechnicalClasses.ENHANCER_TEXTANNOTATION); it
-                    .hasNext();) {
+                    .hasNext(); ) {
                 UriRef uri = (UriRef) it.next().getSubject();
                 if (graph.filter(uri, Properties.DC_RELATION, null).hasNext()) {
                     // this is not the most specific occurrence of this name:
@@ -362,7 +345,7 @@ public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeE
                     // annotations
                     List<UriRef> subsumed = new ArrayList<UriRef>();
                     for (Iterator<Triple> it2 = graph.filter(null, Properties.DC_RELATION, uri); it2
-                            .hasNext();) {
+                            .hasNext(); ) {
                         subsumed.add((UriRef) it2.next().getSubject());
                     }
                     textAnnotations.put(namedEntity, subsumed);
@@ -372,12 +355,12 @@ public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeE
             ci.getLock().readLock().unlock();
         }
         // search the suggestions
-        Map<NamedEntity,List<Suggestion>> suggestions = new HashMap<NamedEntity,List<Suggestion>>(
+        Map<NamedEntity, List<Suggestion>> suggestions = new HashMap<NamedEntity, List<Suggestion>>(
                 textAnnotations.size());
-        for (Entry<NamedEntity,List<UriRef>> entry : textAnnotations.entrySet()) {
+        for (Entry<NamedEntity, List<UriRef>> entry : textAnnotations.entrySet()) {
             try {
                 List<Suggestion> entitySuggestions = computeEntityRecommentations(site, entry.getKey(),
-                    entry.getValue(), contentLangauge);
+                        entry.getValue(), contentLangauge);
                 if (entitySuggestions != null && !entitySuggestions.isEmpty()) {
                     suggestions.put(entry.getKey(), entitySuggestions);
                 }
@@ -389,21 +372,21 @@ public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeE
         ci.getLock().writeLock().lock();
         try {
             RdfValueFactory factory = RdfValueFactory.getInstance();
-            Map<String,Representation> entityData = new HashMap<String,Representation>();
-            for (Entry<NamedEntity,List<Suggestion>> entitySuggestions : suggestions.entrySet()) {
+            Map<String, Representation> entityData = new HashMap<String, Representation>();
+            for (Entry<NamedEntity, List<Suggestion>> entitySuggestions : suggestions.entrySet()) {
                 List<UriRef> subsumed = textAnnotations.get(entitySuggestions.getKey());
                 List<NonLiteral> annotationsToRelate = new ArrayList<NonLiteral>(subsumed);
                 annotationsToRelate.add(entitySuggestions.getKey().getEntity());
                 for (Suggestion suggestion : entitySuggestions.getValue()) {
                     log.debug("Add Suggestion {} for {}", suggestion.getEntity().getId(),
-                        entitySuggestions.getKey());
+                            entitySuggestions.getKey());
                     EnhancementRDFUtils.writeEntityAnnotation(this, literalFactory, graph, ci.getUri(),
-                        annotationsToRelate, suggestion, nameField,
-                        // TODO: maybe we want labels in a different
-                        // language than the
-                        // language of the content (e.g. Accept-Language
-                        // header)?!
-                        contentLangauge == null ? DEFAULT_LANGUAGE : contentLangauge);
+                            annotationsToRelate, suggestion, nameField,
+                            // TODO: maybe we want labels in a different
+                            // language than the
+                            // language of the content (e.g. Accept-Language
+                            // header)?!
+                            contentLangauge == null ? DEFAULT_LANGUAGE : contentLangauge);
                     if (dereferenceEntities) {
                         entityData.put(suggestion.getEntity().getId(), suggestion.getEntity()
                                 .getRepresentation());
@@ -424,22 +407,15 @@ public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeE
 
     /**
      * Computes the Enhancements
-     * 
-     * @param site
-     *            The {@link SiteException} id or <code>null</code> to use the {@link Entityhub}
-     * @param literalFactory
-     *            the {@link LiteralFactory} used to create RDF Literals
-     * @param contentItemId
-     *            the id of the contentItem
-     * @param textAnnotation
-     *            the text annotation to enhance
-     * @param subsumedAnnotations
-     *            other text annotations for the same entity
-     * @param language
-     *            the language of the analysed text or <code>null</code> if not available.
+     *
+     * @param site                The {@link SiteException} id or <code>null</code> to use the {@link Entityhub}
+     * @param literalFactory      the {@link LiteralFactory} used to create RDF Literals
+     * @param contentItemId       the id of the contentItem
+     * @param textAnnotation      the text annotation to enhance
+     * @param subsumedAnnotations other text annotations for the same entity
+     * @param language            the language of the analysed text or <code>null</code> if not available.
      * @return the suggestions for the parsed {@link NamedEntity}
-     * @throws EntityhubException
-     *             On any Error while looking up Entities via the Entityhub
+     * @throws EntityhubException On any Error while looking up Entities via the Entityhub
      */
     protected final List<Suggestion> computeEntityRecommentations(Site site,
                                                                   NamedEntity namedEntity,
@@ -457,18 +433,17 @@ public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeE
 
         FieldQuery query = queryFactory.createFieldQuery();
 
-        // replace spaces with plus to create an AND search for all words in the
-        // name!
-        Constraint labelConstraint;
         // TODO: make case sensitivity configurable
         boolean casesensitive = false;
         String namedEntityLabel = casesensitive ? namedEntity.getName() : namedEntity.getName().toLowerCase();
-        if (language != null) {
-            // search labels in the language and without language
-            labelConstraint = new TextConstraint(namedEntityLabel, casesensitive, language, null);
+
+        Constraint labelConstraint;
+        if (useSimilarityQuery) {
+            labelConstraint = createSimLabelConstraint(language, namedEntityLabel);
         } else {
-            labelConstraint = new TextConstraint(namedEntityLabel, casesensitive);
+            labelConstraint = createTextLabelConstraint(language, namedEntityLabel, casesensitive);
         }
+
         query.setConstraint(nameField, labelConstraint);
         if (OntologicalClasses.DBPEDIA_PERSON.equals(namedEntity.getType())) {
             if (personState) {
@@ -512,7 +487,7 @@ public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeE
                 .getClass());
 
         QueryResultList<Entity> results = site == null ? // if site is NULL
-        entityhub.findEntities(query)
+                entityhub.findEntities(query)
                 : // use the Entityhub
                 site.findEntities(query); // else the referenced site
         log.debug(" - {} results returned by query {}", results.size(), results.getQuery());
@@ -526,7 +501,7 @@ public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeE
         Float maxExactScore = null;
         List<Suggestion> matches = new ArrayList<Suggestion>(numSuggestions);
         // assumes entities are sorted by score
-        for (Iterator<Entity> guesses = results.iterator(); guesses.hasNext();) {
+        for (Iterator<Entity> guesses = results.iterator(); guesses.hasNext(); ) {
             Suggestion match = new Suggestion(guesses.next());
             Representation rep = match.getEntity().getRepresentation();
             Float score = rep.getFirst(RdfResourceEnum.resultScore.getUri(), Float.class);
@@ -537,13 +512,13 @@ public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeE
             while (labels.hasNext() && match.getLevenshtein() < 1.0) {
                 Text label = labels.next();
                 if (language == null || // if the content language is unknown ->
-                                        // accept all labels
-                    label.getLanguage() == null || // accept labels with no
-                                                   // language
-                    // and labels in the same language as the content
-                    (language != null && label.getLanguage().startsWith(language))) {
+                        // accept all labels
+                        label.getLanguage() == null || // accept labels with no
+                        // language
+                        // and labels in the same language as the content
+                        (language != null && label.getLanguage().startsWith(language))) {
                     double actMatch = levenshtein(
-                        casesensitive ? label.getText() : label.getText().toLowerCase(), namedEntityLabel);
+                            casesensitive ? label.getText() : label.getText().toLowerCase(), namedEntityLabel);
                     if (actMatch > match.getLevenshtein()) {
                         match.setLevenshtein(actMatch);
                         match.setMatchedLabel(label);
@@ -572,10 +547,33 @@ public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeE
         return matches.subList(0, Math.min(matches.size(), numSuggestions));
     }
 
+    private Constraint createSimLabelConstraint(final String language, final String namedEntityLabel) {
+        Constraint labelConstraint;
+        if (language != null) {
+            // search labels in the language and without language
+            labelConstraint = new SimilarityConstraint(Collections.singleton(namedEntityLabel), Collections.singleton(language));
+        } else {
+            labelConstraint = new SimilarityConstraint(Collections.singleton(namedEntityLabel), DataTypeEnum.Text);
+        }
+        return labelConstraint;
+    }
+
+    private Constraint createTextLabelConstraint(final String language, final String namedEntityLabel, final boolean casesensitive) {
+        Constraint labelConstraint;
+        if (language != null) {
+            // search labels in the language and without language
+            labelConstraint = new TextConstraint(namedEntityLabel, casesensitive, language, null);
+        } else {
+            labelConstraint = new TextConstraint(namedEntityLabel, casesensitive);
+        }
+
+        return labelConstraint;
+    }
+
     /**
      * This EnhancementEngine can enhance any ContentItem as it does consume existing TextAnnotations with the
      * configured dc:type's
-     * 
+     *
      * @see org.apache.stanbol.enhancer.servicesapi.EnhancementEngine#canEnhance(org.apache.stanbol.enhancer.servicesapi.ContentItem)
      */
     public int canEnhance(ContentItem ci) {
@@ -583,24 +581,21 @@ public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeE
     }
 
     @Override
-    public Map<String,Object> getServiceProperties() {
+    public Map<String, Object> getServiceProperties() {
         return Collections.unmodifiableMap(Collections.singletonMap(ENHANCEMENT_ENGINE_ORDERING,
-            (Object) defaultOrder));
+                (Object) defaultOrder));
     }
 
     /**
      * Compares two strings (after {@link StringUtils#trim(String) trimming}) by using the Levenshtein's Edit
      * Distance of the two strings. Does not return the {@link Integer} number of changes but
      * <code>1-(changes/maxStringSizeAfterTrim)</code>
-     * <p>
-     * 
-     * @param s1
-     *            the first string
-     * @param s2
-     *            the second string
+     * <p/>
+     *
+     * @param s1 the first string
+     * @param s2 the second string
      * @return the distance
-     * @throws IllegalArgumentException
-     *             if any of the two parsed strings is NULL
+     * @throws IllegalArgumentException if any of the two parsed strings is NULL
      */
     private static double levenshtein(String s1, String s2) {
         if (s1 == null || s2 == null) {
@@ -610,6 +605,6 @@ public class NamedEntityTaggingEngine extends AbstractEnhancementEngine<RuntimeE
         s2 = StringUtils.trim(s2);
         return s1.isEmpty() || s2.isEmpty() ? 0
                 : 1.0 - (((double) getLevenshteinDistance(s1, s2)) / ((double) (Math.max(s1.length(),
-                    s2.length()))));
+                s2.length()))));
     }
 }

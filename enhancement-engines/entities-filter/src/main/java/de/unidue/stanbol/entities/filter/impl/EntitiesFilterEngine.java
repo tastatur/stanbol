@@ -105,8 +105,8 @@ public class EntitiesFilterEngine extends AbstractEnhancementEngine<RuntimeExcep
             final Iterator<Triple> entityReferences = contentItem.getMetadata().filter(null, ENHANCER_ENTITY_REFERENCE, null);
             entityReferences.forEachRemaining(entityReference -> {
                 final UriRef referencedEntity = (UriRef) entityReference.getObject();
-                final Double entityHubRank = EnhancementEngineHelper.get(contentItem.getMetadata(), referencedEntity, entityHubRanking,
-                        Double.class, literalFactory);
+                final Float entityHubRank = EnhancementEngineHelper.get(contentItem.getMetadata(), referencedEntity, entityHubRanking,
+                        Float.class, literalFactory);
                 if (entityHubRank < engineConfiguration.getMinEntityHubRank()) {
                     contentItem.getMetadata().remove(entityReference);
                     contentItem.getMetadata().removeIf(triple -> triple.getSubject().equals(referencedEntity));

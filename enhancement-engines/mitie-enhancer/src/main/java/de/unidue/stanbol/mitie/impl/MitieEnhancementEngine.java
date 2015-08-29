@@ -43,6 +43,8 @@ public class MitieEnhancementEngine extends AbstractEnhancementEngine<RuntimeExc
     @Activate
     @Override
     protected void activate(ComponentContext ce) throws ConfigurationException {
+        super.activate(ce); 
+
         final String modelFile = ce.getProperties().get(MODEL_FILE_PROP).toString();
         final String modelsDataDir = ce.getBundleContext().getProperty("de.unidue.modelsdir");
         final String modelPath = Paths.get(modelsDataDir.concat(modelFile)).toAbsolutePath().toString();

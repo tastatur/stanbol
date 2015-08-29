@@ -54,6 +54,8 @@ public class EntitiesFilterEngine extends AbstractEnhancementEngine<RuntimeExcep
     @Activate
     @Override
     protected void activate(ComponentContext ce) throws ConfigurationException {
+        super.activate(ce);
+
         engineConfiguration = new EntitiesFilterEngineConfiguration();
 
         Object value = ce.getProperties().get(EntitiesFilterEngineConfiguration.MINIMAL_ENTITY_HUB_RANK_PROPERTY);

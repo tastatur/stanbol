@@ -1,10 +1,7 @@
 package de.unidue.stanbol.entities.filter.impl;
 
 import de.unidue.stanbol.entities.filter.data.EntitiesFilterEngineConfiguration;
-import org.apache.clerezza.rdf.core.LiteralFactory;
-import org.apache.clerezza.rdf.core.MGraph;
-import org.apache.clerezza.rdf.core.Triple;
-import org.apache.clerezza.rdf.core.UriRef;
+import org.apache.clerezza.rdf.core.*;
 import org.apache.felix.scr.annotations.*;
 import org.apache.stanbol.enhancer.servicesapi.ContentItem;
 import org.apache.stanbol.enhancer.servicesapi.EngineException;
@@ -16,7 +13,9 @@ import org.osgi.framework.Constants;
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.component.ComponentContext;
 
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_CONFIDENCE;
 import static org.apache.stanbol.enhancer.servicesapi.rdf.Properties.ENHANCER_ENTITY_REFERENCE;
@@ -81,6 +80,8 @@ public class EntitiesFilterEngine extends AbstractEnhancementEngine<RuntimeExcep
 
     private void filterEntitiesWithSmallConfidence(ContentItem contentItem) {
         final LiteralFactory literalFactory = LiteralFactory.getInstance();
+        final Set<Resource> subjectsToRemove = new HashSet<>();
+
         contentItem.getLock().writeLock().lock();
         final MGraph graph = contentItem.getMetadata();
         try {
@@ -89,10 +90,12 @@ public class EntitiesFilterEngine extends AbstractEnhancementEngine<RuntimeExcep
                 final Double enhancementConfidence = EnhancementEngineHelper.get(graph, enhancementConfidenceTriple.getSubject(),
                         ENHANCER_CONFIDENCE, Double.class, literalFactory);
                 if (enhancementConfidence < engineConfiguration.getMinConfidence()) {
-                    graph.removeIf(triple -> triple.getSubject().equals(enhancementConfidenceTriple.getSubject()) ||
-                            (triple.getObject()).equals(enhancementConfidenceTriple.getSubject()));
+                    subjectsToRemove.add(enhancementConfidenceTriple.getSubject());
                 }
             });
+
+            graph.removeIf(triple -> subjectsToRemove.contains(triple.getSubject()) ||
+                    subjectsToRemove.contains(triple.getObject()));
         } finally {
             contentItem.getLock().writeLock().unlock();
         }
@@ -100,18 +103,25 @@ public class EntitiesFilterEngine extends AbstractEnhancementEngine<RuntimeExcep
 
     private void filterEntitiesWithSmallEntityRank(ContentItem contentItem) {
         final LiteralFactory literalFactory = LiteralFactory.getInstance();
+        final Set<Triple> entityReferencesToRemove = new HashSet<>();
+        final Set<Resource> subjectsToRemove = new HashSet<>();
+
         contentItem.getLock().writeLock().lock();
+        final MGraph graph = contentItem.getMetadata();
         try {
-            final Iterator<Triple> entityReferences = contentItem.getMetadata().filter(null, ENHANCER_ENTITY_REFERENCE, null);
+            final Iterator<Triple> entityReferences = graph.filter(null, ENHANCER_ENTITY_REFERENCE, null);
             entityReferences.forEachRemaining(entityReference -> {
                 final UriRef referencedEntity = (UriRef) entityReference.getObject();
-                final Float entityHubRank = EnhancementEngineHelper.get(contentItem.getMetadata(), referencedEntity, entityHubRanking,
+                final Float entityHubRank = EnhancementEngineHelper.get(graph, referencedEntity, entityHubRanking,
                         Float.class, literalFactory);
                 if (entityHubRank < engineConfiguration.getMinEntityHubRank()) {
-                    contentItem.getMetadata().remove(entityReference);
-                    contentItem.getMetadata().removeIf(triple -> triple.getSubject().equals(referencedEntity));
+                    entityReferencesToRemove.add(entityReference);
+                    subjectsToRemove.add(referencedEntity);
                 }
             });
+
+            graph.removeIf(triple -> entityReferencesToRemove.contains(triple) ||
+                    subjectsToRemove.contains(triple.getSubject()));
         } finally {
             contentItem.getLock().writeLock().unlock();
         }

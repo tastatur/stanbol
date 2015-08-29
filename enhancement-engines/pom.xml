@@ -118,6 +118,7 @@
     <!-- Misc Engines for master thesis -->
     <module>stanford-ner</module>
     <module>mitie-enhancer</module>
+    <module>entities-filter</module>
   </modules>
 
   <build>

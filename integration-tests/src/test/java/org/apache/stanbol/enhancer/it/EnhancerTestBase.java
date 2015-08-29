@@ -38,8 +38,8 @@ public class EnhancerTestBase extends StanbolTestBase {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     // TODO configurable via system properties??
-    public static final int ENGINES_TIMEOUT_SECONDS = 60;
-    public static final int WAIT_BETWEEN_TRIES_MSEC = 1000;
+    public static final int ENGINES_TIMEOUT_SECONDS = 500;
+    public static final int WAIT_BETWEEN_TRIES_MSEC = 10000;
     
     boolean enginesReady;
     boolean timedOut;

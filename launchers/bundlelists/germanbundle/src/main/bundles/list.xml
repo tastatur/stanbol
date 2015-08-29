@@ -11,5 +11,10 @@
             <groupId>de.unidue.stanbol</groupId>
             <version>0.12.1-SNAPSHOT</version>
         </bundle>
+        <bundle>
+            <groupId>de.unidue.stanbol</groupId>
+            <artifactId>entities-filter</artifactId>
+            <version>0.12.1-SNAPSHOT</version>
+        </bundle>
     </startLevel>
 </bundles>

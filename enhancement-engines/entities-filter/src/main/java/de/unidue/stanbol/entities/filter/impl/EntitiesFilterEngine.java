@@ -94,8 +94,7 @@ public class EntitiesFilterEngine extends AbstractEnhancementEngine<RuntimeExcep
                 }
             });
 
-            graph.removeIf(triple -> subjectsToRemove.contains(triple.getSubject()) ||
-                    subjectsToRemove.contains(triple.getObject()));
+            graph.removeIf(triple -> subjectsToRemove.contains(triple.getSubject()));
         } finally {
             contentItem.getLock().writeLock().unlock();
         }
@@ -103,7 +102,6 @@ public class EntitiesFilterEngine extends AbstractEnhancementEngine<RuntimeExcep
 
     private void filterEntitiesWithSmallEntityRank(ContentItem contentItem) {
         final LiteralFactory literalFactory = LiteralFactory.getInstance();
-        final Set<Triple> entityReferencesToRemove = new HashSet<>();
         final Set<Resource> subjectsToRemove = new HashSet<>();
 
         contentItem.getLock().writeLock().lock();
@@ -115,13 +113,12 @@ public class EntitiesFilterEngine extends AbstractEnhancementEngine<RuntimeExcep
                 final Float entityHubRank = EnhancementEngineHelper.get(graph, referencedEntity, entityHubRanking,
                         Float.class, literalFactory);
                 if (entityHubRank < engineConfiguration.getMinEntityHubRank()) {
-                    entityReferencesToRemove.add(entityReference);
                     subjectsToRemove.add(referencedEntity);
+                    subjectsToRemove.add(entityReference.getSubject());
                 }
             });
 
-            graph.removeIf(triple -> entityReferencesToRemove.contains(triple) ||
-                    subjectsToRemove.contains(triple.getSubject()));
+            graph.removeIf(triple -> subjectsToRemove.contains(triple.getSubject()));
         } finally {
             contentItem.getLock().writeLock().unlock();
         }

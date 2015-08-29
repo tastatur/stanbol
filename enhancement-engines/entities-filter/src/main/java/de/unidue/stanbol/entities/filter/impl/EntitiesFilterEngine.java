@@ -61,11 +61,15 @@ public class EntitiesFilterEngine extends AbstractEnhancementEngine<RuntimeExcep
         Object value = ce.getProperties().get(EntitiesFilterEngineConfiguration.MINIMAL_ENTITY_HUB_RANK_PROPERTY);
         if (value != null && value instanceof Number) {
             engineConfiguration.setMinEntityHubRank(((Number) value).floatValue());
+        } else if (value != null) {
+            engineConfiguration.setMinEntityHubRank(Float.valueOf(value.toString()));
         }
 
         value = ce.getProperties().get(EntitiesFilterEngineConfiguration.MINIMAL_CONFIDENCE_PROPERTY);
         if (value != null && value instanceof Number) {
             engineConfiguration.setMinConfidence(((Number) value).floatValue());
+        } else if (value != null) {
+            engineConfiguration.setMinConfidence(Float.valueOf(value.toString()));
         }
     }
 

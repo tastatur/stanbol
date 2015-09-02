@@ -62,7 +62,7 @@ public class MitieEnhancementEngine extends AbstractEnhancementEngine<RuntimeExc
     }
 
     @Override
-    public void computeEnhancements(ContentItem contentItem) throws EngineException {
+    public synchronized void computeEnhancements(ContentItem contentItem) throws EngineException {
         final AnalysedText at = AnalysedTextUtils.getAnalysedText(contentItem);
         final StringVector tokens = new StringVector();
         at.getTokens().forEachRemaining(token -> tokens.add(token.getSpan()));

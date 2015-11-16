@@ -413,7 +413,7 @@ public class IndexConfiguration {
      */
     public boolean activate() {
         active = true;
-        RefCounted<SolrIndexSearcher> searcherRef = index.getSearcher(true, true, null);
+        RefCounted<SolrIndexSearcher> searcherRef = index.getSearcher();
         try {
             return processFstConfig(searcherRef.get().getAtomicReader());
         }catch (RuntimeException e) { //in case of any excpetion
@@ -489,7 +489,6 @@ public class IndexConfiguration {
             Map<String,File> presentFstFiles = new HashMap<String,File>();
             WildcardFileFilter fstFilter = new WildcardFileFilter(
                 fstName+".*.fst");
-            @SuppressWarnings("unchecked")
             Iterator<File> fstFiles = FileUtils.iterateFiles(fstDirectory, fstFilter, null);
             while(fstFiles.hasNext()){
                 File fstFile = fstFiles.next();
